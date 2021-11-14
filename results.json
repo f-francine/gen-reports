@@ -1,0 +1,22 @@
+{
+  "excluded": [],
+  "failed": [],
+  "invalid": [],
+  "passed": [
+    {
+      "describe": "execute/1",
+      "file": "/home/fran/Workspace/ignite/gen-reports/test/gen_report_test.exs",
+      "line": 16,
+      "module": "Elixir.GenReportTest",
+      "test": "test execute/1 When no file name was given, returns an error"
+    },
+    {
+      "describe": "execute/1",
+      "file": "/home/fran/Workspace/ignite/gen-reports/test/gen_report_test.exs",
+      "line": 10,
+      "module": "Elixir.GenReportTest",
+      "test": "test execute/1 When passing a file name, returns a report"
+    }
+  ],
+  "skiped": []
+}

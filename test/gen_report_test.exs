@@ -7,16 +7,16 @@ defmodule GenReportTest do
   @file_name "gen_report.csv"
 
   describe "build/1" do
-    test "When passing file name return a report" do
-      response = GenReport.build(@file_name)
+    test "When passing a file name, returns a report" do
+      response = GenReport.execute(@file_name)
 
-      assert response == ReportFixture.build()
+      assert ReportFixture.build() == response
     end
 
-    test "When no filename was given, returns an error" do
-      response = GenReport.build()
+    test "When no file name was given, returns an error" do
+      response = GenReport.execute()
 
-      assert response == {:error, "Insira o nome de um arquivo"}
+      assert response == {:error, :no_file_was_given}
     end
   end
 end
