@@ -2,6 +2,10 @@ defmodule GenReport.CSVParser do
   @moduledoc """
   Parses a CSV file, transforming each line of the file into a list.
   """
+
+@doc """
+Paerses a given csv file into a list.
+"""
   @spec execute(file_name :: String.t()) :: Stream.t()
   def execute(file_name) do
     "reports/#{file_name}"
