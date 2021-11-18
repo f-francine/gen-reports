@@ -48,6 +48,11 @@ defmodule GenReport do
     "12" => "december"
   }
 
+  def execute(file_names) when is_list(file_names) do
+    file_names
+    |> Task.async_stream(&execute/1)
+  end
+
   @doc """
   Generates a report for a given csv file.
   """
@@ -105,5 +110,23 @@ defmodule GenReport do
       {:step2, false} ->
         put_in(map, [key1, key2], value)
     end
+  end
+
+  defp merge_response(%{"all_hours" => all_hours}, acc, :all_hours) do
+    Enum.merge(all_hours, acc, fn _key, value1, value2 -> value1 + value2 end)
+  end
+
+  defp merge_response(%{"hours_per_month" => all_hours}, acc, :hours_per_month) do
+    Enum.merge(all_hours, acc, fn _key, value1, value2 -> value1 + value2 end)
+  end
+
+  defp merge_response(%{"hours_per_year" => all_hours}, acc, :hours_per_year) do
+    Enum.merge(all_hours, acc, fn _key, value1, value2 -> value1 + value2 end)
+  end
+
+  defp merge_all(all_hours, hours_per_month, hours_per_year) do
+    all_hours
+    |> Map.merge(hours_per_month)
+    |> Map.merge(hours_per_year)
   end
 end
