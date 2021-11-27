@@ -30,6 +30,7 @@ defmodule GenReport do
       }
     }
   """
+  require Logger
 
   alias GenReport.CSVParser
 
@@ -48,22 +49,43 @@ defmodule GenReport do
     "12" => "december"
   }
 
-  def execute(file_names) when is_list(file_names) do
-    file_names
-    |> Task.async_stream(&execute/1)
-  end
-
   @doc """
   Generates a report for a given csv file.
   """
   @spec execute(file_name :: String.t()) :: map()
   def execute(file_name) do
+    Logger.info("Generating report for #{file_name}")
+
     file_name
     |> CSVParser.execute()
     |> build_response()
+  rescue
+    error ->
+      Logger.info("Failed to generate report because #{inspect(error)}")
+      {:error, error}
   end
 
-  def execute(), do: {:error, :no_file_was_given}
+  @spec execute() :: {:error, :no_file_was_given}
+  def execute() do
+    Logger.info("Failed t generate report because no file was given")
+    {:error, :no_file_was_given}
+  end
+
+  @doc """
+  It generates a report, same as execute/1, but receiving a list of csv files.
+  """
+  @spec execute_from_many(file_names :: List.t()) :: any()
+  def execute_from_many(file_names) when is_list(file_names) do
+    Logger.info("Generating report for #{inspect(file_names)}")
+
+    file_names
+    |> Task.async_stream(&execute/1)
+    |> build_response_from_many()
+  rescue
+    error ->
+      Logger.info("Failed to generate report because #{inspect(error)}")
+      {:error, error}
+  end
 
   defp build_response(line) do
     %{
@@ -112,21 +134,39 @@ defmodule GenReport do
     end
   end
 
-  defp merge_response(%{"all_hours" => all_hours}, acc, :all_hours) do
-    Enum.merge(all_hours, acc, fn _key, value1, value2 -> value1 + value2 end)
+  defp build_response_from_many(report) do
+    %{
+      "all_hours" => merge_responses(report, :all_hours),
+      "hours_per_month" => merge_responses(report, :hours_per_month),
+      "hours_per_year" => merge_responses(report, :hours_per_year)
+    }
   end
 
-  defp merge_response(%{"hours_per_month" => all_hours}, acc, :hours_per_month) do
-    Enum.merge(all_hours, acc, fn _key, value1, value2 -> value1 + value2 end)
+  defp merge_responses(report, :all_hours) do
+    Enum.reduce(report, %{}, fn {:ok, %{"all_hours" => all_hours}}, acc ->
+      Map.merge(all_hours, acc, fn _key, value1, value2 ->
+        value1 + value2
+      end)
+    end)
   end
 
-  defp merge_response(%{"hours_per_year" => all_hours}, acc, :hours_per_year) do
-    Enum.merge(all_hours, acc, fn _key, value1, value2 -> value1 + value2 end)
+  defp merge_responses(report, :hours_per_month) do
+    Enum.reduce(report, %{}, fn {:ok, %{"hours_per_month" => hours_per_month}}, acc ->
+      Map.merge(hours_per_month, acc, fn _key, value1, value2 ->
+        merge_months(value1, value2)
+      end)
+    end)
   end
 
-  defp merge_all(all_hours, hours_per_month, hours_per_year) do
-    all_hours
-    |> Map.merge(hours_per_month)
-    |> Map.merge(hours_per_year)
+  defp merge_responses(report, :hours_per_year) do
+    Enum.reduce(report, %{}, fn {:ok, %{"hours_per_year" => hours_per_year}}, acc ->
+      Map.merge(hours_per_year, acc, fn _key, value1, value2 ->
+        merge_months(value1, value2)
+      end)
+    end)
+  end
+
+  defp merge_months(map1, map2) do
+    Map.merge(map1, map2, fn _, value1, value2 -> value1 + value2 end)
   end
 end
