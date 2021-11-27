@@ -4,16 +4,23 @@
   "invalid": [],
   "passed": [
     {
+      "describe": "execute_from_many",
+      "file": "/home/fran/Workspace/ignite/gen-reports/test/gen_report_test.exs",
+      "line": 25,
+      "module": "Elixir.GenReportTest",
+      "test": "test execute_from_many When passing a list of files, returns a report"
+    },
+    {
       "describe": "execute/1",
       "file": "/home/fran/Workspace/ignite/gen-reports/test/gen_report_test.exs",
-      "line": 16,
+      "line": 17,
       "module": "Elixir.GenReportTest",
       "test": "test execute/1 When no file name was given, returns an error"
     },
     {
       "describe": "execute/1",
       "file": "/home/fran/Workspace/ignite/gen-reports/test/gen_report_test.exs",
-      "line": 10,
+      "line": 11,
       "module": "Elixir.GenReportTest",
       "test": "test execute/1 When passing a file name, returns a report"
     }
